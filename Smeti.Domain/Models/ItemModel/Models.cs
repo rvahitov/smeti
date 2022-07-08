@@ -29,7 +29,7 @@ public sealed record TimeField(FieldName FieldName, Option<TimeOnly> Value) : II
 
 public sealed record TimeSpanField(FieldName FieldName, Option<TimeSpan> Value) : IItemField;
 
-public sealed record TextField(FieldName FieldName, Option<TimeSpan> Value) : IItemField;
+public sealed record TextField(FieldName FieldName, Option<string> Value) : IItemField;
 
 public sealed record ReferenceField(FieldName FieldName, Option<ItemId> Value) : IItemField;
 

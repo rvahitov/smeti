@@ -1,0 +1,64 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Smeti.Service.Services.Items.Proto";
+
+package item;
+import "google/protobuf/wrappers.proto";
+
+service ItemsService{
+  rpc CreateItem(CreateItemRequest) returns (ItemOut);
+  rpc GetItem(GetItemRequest) returns (ItemOut);
+  rpc AddField(AddFieldRequest) returns (ItemOut);
+  rpc UpdateField(UpdateFieldRequest) returns (ItemOut);
+}
+
+message CreateItemRequest {
+  string itemId = 1;
+  repeated Field fields = 2;
+}
+
+message GetItemRequest {
+  string itemId = 1;
+}
+
+message AddFieldRequest{
+  string itemId = 1;
+  Field field = 2;
+}
+
+message UpdateFieldRequest {
+  string itemId = 1;
+  Field field = 2;
+}
+
+message Field {
+  string name = 1;
+  ValueType valueType = 2;
+  oneof value {
+    google.protobuf.BoolValue boolean = 3;
+    google.protobuf.Int64Value integer = 4;
+    google.protobuf.DoubleValue decimal = 5;
+    google.protobuf.StringValue text = 6;
+    google.protobuf.StringValue dateTime = 7;
+    google.protobuf.StringValue date = 8;
+    google.protobuf.StringValue time = 9;
+    google.protobuf.StringValue reference = 10;
+  }
+}
+
+enum ValueType {
+  boolean = 0;
+  integer = 1;
+  decimal = 2;
+  text = 3;
+  dateTime = 4;
+  date = 5;
+  time = 6;
+  reference = 7;
+}
+
+message ItemOut {
+  string id = 1;
+  repeated Field fields = 2;
+}
+

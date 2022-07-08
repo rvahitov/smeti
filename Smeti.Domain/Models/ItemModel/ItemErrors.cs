@@ -16,19 +16,20 @@ public static class ItemErrors
     }
 
     public static Error AlreadyExists(ItemId itemId) =>
-        Error.New(Codes.ItemAlreadyExists, $"Item {itemId} already exists");
+        Error.New(Codes.ItemAlreadyExists, $"Item '{itemId}' already exists");
 
     public static Error NotExist(ItemId itemId) =>
-        Error.New(Codes.ItemNotExist, $"Item {itemId} does not exist");
+        Error.New(Codes.ItemNotExist, $"Item '{itemId}' does not exist");
 
     public static Error AlreadyHasField(ItemId itemId, FieldName fieldName) =>
-        Error.New(Codes.ItemAlreadyHasField, $"Item {itemId} already has field {fieldName}");
+        Error.New(Codes.ItemAlreadyHasField, $"Item '{itemId}' already has field '{fieldName}'");
 
     public static Error NotHaveField(ItemId itemId, FieldName fieldName) =>
-        Error.New(Codes.ItemNotHaveField, $"Item {itemId} does not have field {fieldName}");
+        Error.New(Codes.ItemNotHaveField, $"Item '{itemId}' does not have field '{fieldName}'");
 
     public static Error FieldsDuplicates(ItemId itemId, IEnumerable<FieldName> fieldNames) =>
         string
            .Join(", ", fieldNames)
-           .Apply(s => Error.New(Codes.ItemFieldDuplicates, $"Failed create item {itemId} with duplicate fields: {s}"));
+           .Apply(s => Error.New(Codes.ItemFieldDuplicates,
+                $"Failed create item '{itemId}' with duplicate fields: {s}"));
 }
