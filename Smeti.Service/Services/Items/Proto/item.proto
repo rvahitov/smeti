@@ -43,6 +43,7 @@ message Field {
     google.protobuf.StringValue date = 8;
     google.protobuf.StringValue time = 9;
     google.protobuf.StringValue reference = 10;
+    google.protobuf.StringValue timeSpan = 11;
   }
 }
 
@@ -55,6 +56,7 @@ enum ValueType {
   date = 5;
   time = 6;
   reference = 7;
+  timeSpan = 8;
 }
 
 message ItemOut {

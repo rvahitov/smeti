@@ -65,6 +65,10 @@ public static class ProtoExtensions
                 var referenceField = new Field { Name = name.Value, ValueType = ValueType.Reference, Reference = null };
                 value.Iter(v => referenceField.Reference = v.Value);
                 return referenceField;
+            case TimeSpanField(var name, var value):
+                var timeSpanField = new Field { Name = name.Value, ValueType = ValueType.TimeSpan, TimeSpan = null };
+                value.Iter(v => timeSpanField.TimeSpan = v.ToString());
+                return timeSpanField;
             default:
                 throw new Exception("Not supported field");
         }
@@ -107,6 +111,12 @@ public static class ProtoExtensions
                               .Optional(field.Reference)
                               .Map(id => new ItemId(id))
                               .Apply(value => new ReferenceField(new FieldName(field.Name), value)),
+
+        ValueType.TimeSpan =>
+            Prelude
+               .Optional(field.TimeSpan)
+               .Map(TimeSpan.Parse)
+               .Apply(value => new TimeSpanField(new FieldName(field.Name), value)),
 
         _ => throw new Exception("Not supported field")
     };
