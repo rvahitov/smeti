@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smeti.Domain", "Smeti.Domai
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smeti.Service", "Smeti.Service\Smeti.Service.csproj", "{79A3B97C-F2FB-4A69-B048-0EFDCFC0EF4F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smeti.Projection", "Smeti.Projection\Smeti.Projection.csproj", "{FDC57BF9-0ACB-40C1-BBF8-D570E823324F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{79A3B97C-F2FB-4A69-B048-0EFDCFC0EF4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79A3B97C-F2FB-4A69-B048-0EFDCFC0EF4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79A3B97C-F2FB-4A69-B048-0EFDCFC0EF4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDC57BF9-0ACB-40C1-BBF8-D570E823324F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDC57BF9-0ACB-40C1-BBF8-D570E823324F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDC57BF9-0ACB-40C1-BBF8-D570E823324F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDC57BF9-0ACB-40C1-BBF8-D570E823324F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
