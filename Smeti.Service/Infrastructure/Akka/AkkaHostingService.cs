@@ -10,6 +10,7 @@ using LanguageExt;
 using Microsoft.Extensions.FileProviders;
 using Smeti.Domain.Models.ItemDefinitionModel;
 using Smeti.Domain.Models.ItemModel;
+using Smeti.Domain.Projections.ItemDefinitions;
 
 namespace Smeti.Service.Infrastructure.Akka;
 
@@ -52,26 +53,15 @@ public static class AkkaHostingService
                         new MessageExtractor(),
                         shardOptions
                     )
-                    /*
-                    .WithActors((system, registry) =>
-                     {
-                         var dependencyResolver = DependencyResolver.For(system);
-                         var bookProjection = system.ActorOf(dependencyResolver.Props<BookProjectionActor>(),
-                             "book-projection");
-                         registry.Register<BookProjectionActor>(bookProjection);
- 
-                         var paragraphDbProjection = system.ActorOf(
-                             dependencyResolver.Props<ParagraphDbProjectionActor>(),
-                             "paragraph_db_projection"
-                         );
-                         registry.Register<ParagraphDbProjectionActor>(paragraphDbProjection);
- 
-                         var luceneProjection = system
-                            .ActorOf(dependencyResolver.Props<LuceneIndexWriteProjection>(), "lucene-projection");
-                         registry.Register<LuceneIndexWriteProjection>(luceneProjection);
-                     })
-                     */
-                    ;
+                   .WithActors((system, registry) =>
+                    {
+                        var dependencyResolver = DependencyResolver.For(system);
+                        var itemDefinitionDbProjection =
+                            system.ActorOf(dependencyResolver.Props<ItemDefinitionDbProjectionActor>(),
+                                "item-definition-db-projection"
+                            );
+                        registry.Register<ItemDefinitionDbProjectionActor>(itemDefinitionDbProjection);
+                    });
             });
     }
 

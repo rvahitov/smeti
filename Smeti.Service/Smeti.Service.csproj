@@ -19,10 +19,12 @@
         <PackageReference Include="FluentValidation" Version="11.1.0" />
         <PackageReference Include="Grpc.AspNetCore" Version="2.47.0" />
         <PackageReference Include="Hocon.Extensions.Configuration" Version="2.0.4" />
+        <PackageReference Include="Npgsql" Version="6.0.2" />
         <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Smeti.Domain.Projections\Smeti.Domain.Projections.csproj" />
         <ProjectReference Include="..\Smeti.Domain\Smeti.Domain.csproj" />
     </ItemGroup>
 
