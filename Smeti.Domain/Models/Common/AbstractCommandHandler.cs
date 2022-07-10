@@ -3,6 +3,7 @@ using Akka.Hosting;
 using LanguageExt;
 using LanguageExt.Common;
 using MediatR;
+using Smeti.Domain.Extensions;
 
 namespace Smeti.Domain.Models.Common;
 
@@ -22,14 +23,9 @@ internal abstract class AbstractCommandHandler<TActor, TCommand, TResult>
     {
         return await
                    (from validatedCommand in ValidateCommand(command, cancellationToken)
-                    from result in TryAsk(validatedCommand, cancellationToken)
+                    from result in _actor.TryAsk(validatedCommand, AskTimeout, cancellationToken)
                     select result);
     }
-
-    private EitherAsync<Error, TResult> TryAsk(TCommand command, CancellationToken cancellationToken) =>
-        Prelude.TryAsync(() => _actor.Ask<Either<Error, TResult>>(command, AskTimeout, cancellationToken))
-               .ToEither()
-               .Bind(e => e.ToAsync());
 
     protected virtual EitherAsync<Error, TCommand> ValidateCommand(
         TCommand command,

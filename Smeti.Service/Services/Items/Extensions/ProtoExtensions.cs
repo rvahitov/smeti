@@ -1,5 +1,6 @@
 ﻿using LanguageExt;
 using Smeti.Domain.Models.Common;
+using Smeti.Domain.Models.ItemDefinitionModel;
 using Smeti.Domain.Models.ItemModel;
 using Smeti.Service.Services.Items.Proto;
 using ValueType = Smeti.Service.Services.Items.Proto.ValueType;
@@ -15,7 +16,11 @@ public static class ProtoExtensions
            .Optional(request.ItemId)
            .Map(id => new ItemId(id))
            .IfNone(ItemId.Next())
-           .Apply(id => new CreateItemCommand(id, request.Fields.Select(f => f.ToDomainField()).Freeze()));
+           .Apply(id => new CreateItemCommand(
+                id,
+                new ItemDefinitionId(request.ItemDefinitionId),
+                request.Fields.Select(f => f.ToDomainField()).Freeze())
+            );
 
     public static AddFieldCommand ToCommand(this AddFieldRequest request) =>
         new (new ItemId(request.ItemId), request.Field.ToDomainField());

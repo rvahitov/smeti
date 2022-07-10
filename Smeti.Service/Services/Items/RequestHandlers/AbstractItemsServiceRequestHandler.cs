@@ -2,6 +2,7 @@
 using LanguageExt;
 using LanguageExt.Common;
 using MediatR;
+using Smeti.Domain.Extensions;
 using Smeti.Domain.Models.ItemModel;
 using Smeti.Service.Extensions;
 using Smeti.Service.Services.Items.Extensions;
@@ -36,6 +37,6 @@ public abstract class AbstractItemsServiceRequestHandler<TRequest>
         CreateItemRequest r  => r.ToCommand(),
         AddFieldRequest r    => r.ToCommand(),
         UpdateFieldRequest r => r.ToCommand(),
-        _                    => throw new Exception("Not supported command")
+        _                    => throw new Exception("Not supported request")
     };
 }

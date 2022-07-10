@@ -14,7 +14,8 @@ service ItemsService{
 
 message CreateItemRequest {
   string itemId = 1;
-  repeated Field fields = 2;
+  string itemDefinitionId = 2;
+  repeated Field fields = 3;
 }
 
 message GetItemRequest {
@@ -55,8 +56,8 @@ enum ValueType {
   dateTime = 4;
   date = 5;
   time = 6;
-  reference = 7;
-  timeSpan = 8;
+  timeSpan = 7;
+  reference = 8;
 }
 
 message ItemOut {

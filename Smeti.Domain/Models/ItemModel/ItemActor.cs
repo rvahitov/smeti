@@ -3,35 +3,29 @@ using Akka.Persistence;
 using JetBrains.Annotations;
 using LanguageExt;
 using LanguageExt.Common;
+using LanguageExt.UnsafeValueAccess;
+using MediatR;
+using Smeti.Domain.Extensions;
 using Smeti.Domain.Models.Common;
+using Smeti.Domain.Models.ItemDefinitionModel;
 
 namespace Smeti.Domain.Models.ItemModel;
 
 public sealed class ItemActor : ReceivePersistentActor
 {
+    private readonly IMediator _mediator;
     private Option<ItemState> _state;
 
     [UsedImplicitly]
-    public ItemActor(string persistenceId)
+    public ItemActor(string persistenceId, IMediator mediator)
     {
+        _mediator = mediator;
         PersistenceId = persistenceId;
 
-        Command<IItemCommand>(command =>
-        {
-            if(command is GetItemCommand(var id))
-            {
-                Sender.Tell(_state.Map(s => s.ToModel(id)).ToEither(ItemErrors.NotExist(id)));
-                return;
-            }
-
-            var errorOrEvent = TryCreateEventFromCommand(command);
-            Prelude.match(
-                errorOrEvent,
-                @event => Persist(@event, OnEventPersisted),
-                error => Sender.Tell(Prelude.Left<Error, Item>(error))
-            );
-        });
-
+        Command<GetItemCommand>(HandleCommand);
+        CommandAsync<CreateItemCommand>(HandleCommand);
+        CommandAsync<AddFieldCommand>(HandleCommand);
+        CommandAsync<UpdateFieldCommand>(HandleCommand);
         Recover<IItemEvent>(@event => _state = _state.ApplyEvent(@event));
 
         Recover<SnapshotOffer>(offer =>
@@ -45,53 +39,90 @@ public sealed class ItemActor : ReceivePersistentActor
 
     public override string PersistenceId { get; }
 
-    private void OnEventPersisted(IItemEvent @event)
+    private void HandleCommand(GetItemCommand command)
     {
-        _state = _state.ApplyEvent(@event);
-        var itemId = @event.ItemId;
-        Sender.Tell(_state.Map(s => s.ToModel(itemId)).ToEither(ItemErrors.NotExist(itemId)));
-        _state.IfSome(s =>
-        {
-            if(LastSequenceNr % 500 == 0)
-                SaveSnapshot(s);
-        });
+        Sender.Tell(GetModel(command.ItemId));
     }
 
-    private Either<Error, IItemEvent> TryCreateEventFromCommand(IItemCommand command)
+    private async Task HandleCommand(CreateItemCommand command)
     {
-        switch(command)
+        var (itemId, itemDefinitionId, itemFields) = command;
+        var duplicates = FindDuplicates(itemFields);
+        if(duplicates.Count > 0)
         {
-            case CreateItemCommand when _state.IsSome:
-                return ItemErrors.AlreadyExists(command.ItemId);
-
-            case CreateItemCommand(var id, var fields):
-                var duplicates = FindDuplicates(fields);
-                if(duplicates.Count != 0)
-                {
-                    return ItemErrors.FieldsDuplicates(id, duplicates);
-                }
-
-                return new ItemCreatedEvent(id, fields, DateTimeOffset.Now);
-
-            case AddFieldCommand when _state.IsNone:
-                return ItemErrors.NotExist(command.ItemId);
-
-            case AddFieldCommand(var id, var field):
-                return _state.Map(s => s.Fields.ContainsKey(field.FieldName)).IfNone(false)
-                           ? ItemErrors.AlreadyHasField(id, field.FieldName)
-                           : new FieldAddedEvent(id, field, DateTimeOffset.Now);
-
-            case UpdateFieldCommand when _state.IsNone:
-                return ItemErrors.NotExist(command.ItemId);
-
-            case UpdateFieldCommand(var id, var field):
-                return _state.Map(s => s.Fields.ContainsKey(field.FieldName)).IfNone(false)
-                           ? new FieldUpdatedEvent(id, field, DateTimeOffset.Now)
-                           : ItemErrors.NotHaveField(id, field.FieldName);
-
-            default:
-                return CommonErrors.CommandUnknown(command.GetType().FullName!);
+            Sender.Tell(Prelude.Left<Error, Item>(ItemError.FieldsDuplicates(itemId, duplicates)));
+            return;
         }
+
+        var validateCommand = new ValidateItemFieldsCommand(itemDefinitionId, itemFields);
+
+        var errorOrEvent =
+            await _mediator
+                 .TrySend(validateCommand)
+                 .Map(_ => new ItemCreatedEvent(itemId, itemDefinitionId, itemFields, DateTimeOffset.Now));
+        Prelude.match(
+            errorOrEvent,
+            @event => Persist(@event, OnEventPersisted),
+            error => Sender.Tell(Prelude.Left<Error, Item>(error))
+        );
+    }
+
+    private async Task HandleCommand(AddFieldCommand command)
+    {
+        var (itemId, itemField) = command;
+        var itemDefinitionId = _state.Map(s => s.ItemDefinitionId);
+        if(itemDefinitionId.IsNone)
+        {
+            Sender.Tell(Prelude.Left<Error, Item>(ItemError.NotExist(itemId)));
+            return;
+        }
+
+        if(_state.Map(s => s.Fields.ContainsKey(itemField.FieldName)).IfNone(false))
+        {
+            Sender.Tell(Prelude.Left<Error, Item>(ItemError.AlreadyHasField(itemId, itemField.FieldName)));
+            return;
+        }
+
+        var validateCommand = new ValidateItemFieldsCommand(itemDefinitionId.ValueUnsafe(), List.create(itemField));
+        var errorOrEvent =
+            await _mediator
+                 .TrySend(validateCommand)
+                 .Map(_ => new FieldAddedEvent(itemId, itemField, DateTimeOffset.Now));
+        Prelude.match(
+            errorOrEvent,
+            @event => Persist(@event, OnEventPersisted),
+            error => Sender.Tell(Prelude.Left<Error, Item>(error))
+        );
+    }
+
+    private async Task HandleCommand(UpdateFieldCommand command)
+    {
+        var (itemId, itemField) = command;
+
+        var itemDefinitionId = _state.Map(s => s.ItemDefinitionId);
+
+        if(itemDefinitionId.IsNone)
+        {
+            Sender.Tell(Prelude.Left<Error, Item>(ItemError.NotExist(itemId)));
+            return;
+        }
+
+        if(_state.Map(s => s.Fields.ContainsKey(itemField.FieldName)).IfNone(true) == false)
+        {
+            Sender.Tell(Prelude.Left<Error, Item>(ItemError.NotHaveField(itemId, itemField.FieldName)));
+            return;
+        }
+
+        var validateCommand = new ValidateItemFieldsCommand(itemDefinitionId.ValueUnsafe(), List.create(itemField));
+        var errorOrEvent =
+            await _mediator
+                 .TrySend(validateCommand)
+                 .Map(_ => new FieldUpdatedEvent(itemId, itemField, DateTimeOffset.Now));
+        Prelude.match(
+            errorOrEvent,
+            @event => Persist(@event, OnEventPersisted),
+            error => Sender.Tell(Prelude.Left<Error, Item>(error))
+        );
     }
 
     private static Lst<FieldName> FindDuplicates(IEnumerable<IItemField> fields) =>
@@ -103,4 +134,19 @@ public sealed class ItemActor : ReceivePersistentActor
             )
            .Filter(count => count > 1)
            .Apply(map => map.Keys.Freeze());
+
+    private void OnEventPersisted(IItemEvent @event)
+    {
+        _state = _state.ApplyEvent(@event);
+        Sender.Tell(GetModel(@event.ItemId));
+        _state.IfSome(s =>
+        {
+            if(LastSequenceNr % 500 == 0)
+                SaveSnapshot(s);
+        });
+    }
+
+    private Either<Error, ItemState> GetState(ItemId id) => _state.ToEither(ItemError.NotExist(id));
+
+    private Either<Error, Item> GetModel(ItemId id) => GetState(id).Map(s => s.ToModel(id));
 }

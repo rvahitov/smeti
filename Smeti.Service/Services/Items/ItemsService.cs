@@ -2,6 +2,7 @@
 using LanguageExt;
 using LanguageExt.Common;
 using MediatR;
+using Smeti.Domain.Extensions;
 using Smeti.Service.Extensions;
 using Smeti.Service.Services.Items.Proto;
 

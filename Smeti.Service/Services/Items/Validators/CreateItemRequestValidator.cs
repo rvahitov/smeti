@@ -10,6 +10,7 @@ public sealed class CreateItemRequestValidator : AbstractValidator<CreateItemReq
     public CreateItemRequestValidator()
     {
         RuleFor(r => r.ItemId).NotEmpty();
+        RuleFor(r => r.ItemDefinitionId).NotEmpty();
         RuleForEach(r => r.Fields).SetValidator(new FieldValidator());
     }
 }

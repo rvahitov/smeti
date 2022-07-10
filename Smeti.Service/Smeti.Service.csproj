@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Protobuf Include="Services\ItemDefinitions\Proto\itemDefinition.proto" GrpcServices="Server" />
         <Protobuf Include="Services\Items\Proto\item.proto" GrpcServices="Server" />
     </ItemGroup>
 
@@ -22,7 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Smeti.Domain\Smeti.Domain.csproj" />
+        <ProjectReference Include="..\Smeti.Domain\Smeti.Domain.csproj" />
     </ItemGroup>
 
 </Project>

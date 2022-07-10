@@ -9,36 +9,32 @@ public interface IFieldSpecification
     int Order { get; }
 }
 
-public abstract class CommonFieldSpecification<T> : IFieldSpecification
+public sealed class ValueOfTypeSpecification<T> : IFieldSpecification
 {
-    public virtual Validation<string, Option<object>>
-        ValidateFieldValue(FieldName fieldName, Option<object> fieldValue) =>
-        fieldValue.Map(value => value.GetType().IsAssignableTo(typeof(T))).IfNone(true)
+    public Validation<string, Option<object>> ValidateFieldValue(FieldName fieldName, Option<object> fieldValue) =>
+        Prelude.match(
+            fieldValue.Map(o => o.GetType().IsAssignableTo(typeof(T))),
+            isMatch => isMatch
+                           ? Prelude.Success<string, Option<object>>(fieldValue)
+                           : Prelude.Fail<string, Option<object>>(
+                               $"Value for field '{fieldName}' must be of type {typeof(T).Name}"),
+            () => Prelude.Success<string, Option<object>>(fieldValue)
+        );
+
+    public int Order => int.MinValue;
+}
+
+public sealed class ValueRequiredFieldSpecification : IFieldSpecification
+{
+    public Validation<string, Option<object>> ValidateFieldValue(FieldName fieldName, Option<object> fieldValue) =>
+        fieldValue.IsSome
             ? fieldValue
-            : $"Value for field '{fieldName}' must be of type {typeof(T).Name}";
+            : $"Value for  field '{fieldName}' is required";
 
-    public abstract int Order { get; }
+    public int Order  => int.MinValue + 1;
 }
 
-public sealed class ValueRequiredFieldSpecification<T> : CommonFieldSpecification<T>
-{
-    public override Validation<string, Option<object>> ValidateFieldValue(
-        FieldName fieldName,
-        Option<object> fieldValue
-    ) =>
-        from v1 in base.ValidateFieldValue(fieldName, fieldValue)
-        from v2 in Validate(fieldName, v1)
-        select v2;
-
-    public override int Order => int.MinValue;
-
-    private Validation<string, Option<object>> Validate(FieldName fieldName, Option<object> fieldValue) =>
-        fieldValue.IsNone
-            ? $"Value for  field '{fieldName}' is required"
-            : fieldValue;
-}
-
-public sealed class MinValueFieldSpecification<T> : CommonFieldSpecification<T>
+public sealed class MinValueFieldSpecification<T> : IFieldSpecification
     where T : IComparable
 {
     private readonly T _minValue;
@@ -48,22 +44,15 @@ public sealed class MinValueFieldSpecification<T> : CommonFieldSpecification<T>
         _minValue = minValue;
     }
 
-    public override int Order => 1;
-
-    public override Validation<string, Option<object>> ValidateFieldValue(
-        FieldName fieldName,
-        Option<object> fieldValue
-    ) => from v1 in base.ValidateFieldValue(fieldName, fieldValue)
-         from v2 in Validate(fieldName, v1)
-         select v2;
-
-    private Validation<string, Option<object>> Validate(FieldName fieldName, Option<object> fieldValue) =>
+    public Validation<string, Option<object>> ValidateFieldValue(FieldName fieldName, Option<object> fieldValue) =>
         fieldValue.Map(value => _minValue.CompareTo(value) <= 0).IfNone(true)
             ? fieldValue
             : $"Value for field '{fieldName}' violates 'Min Value' specification";
+
+    public int Order => int.MinValue + 2;
 }
 
-public sealed class MaxValueFieldSpecification<T> : CommonFieldSpecification<T>
+public sealed class MaxValueFieldSpecification<T> : IFieldSpecification
     where T : IComparable
 {
     private readonly T _maxValue;
@@ -73,22 +62,15 @@ public sealed class MaxValueFieldSpecification<T> : CommonFieldSpecification<T>
         _maxValue = maxValue;
     }
 
-    public override int Order => 2;
-
-    public override Validation<string, Option<object>> ValidateFieldValue(
-        FieldName fieldName,
-        Option<object> fieldValue
-    ) => from v1 in base.ValidateFieldValue(fieldName, fieldValue)
-         from v2 in Validate(fieldName, v1)
-         select v2;
-
-    private Validation<string, Option<object>> Validate(FieldName fieldName, Option<object> fieldValue) =>
+    public Validation<string, Option<object>> ValidateFieldValue(FieldName fieldName, Option<object> fieldValue) =>
         fieldValue.Map(value => _maxValue.CompareTo(value) >= 0).IfNone(true)
             ? fieldValue
             : $"Value for field '{fieldName}' violates 'Max Value' specification";
+
+    public int Order => int.MinValue + 3;
 }
 
-public sealed class MinLengthFieldSpecification : CommonFieldSpecification<string>
+public sealed class MinLengthFieldSpecification : IFieldSpecification
 {
     private readonly int _minLength;
 
@@ -97,47 +79,33 @@ public sealed class MinLengthFieldSpecification : CommonFieldSpecification<strin
         _minLength = minLength;
     }
 
-    public override int Order => 1;
-
-    public override Validation<string, Option<object>> ValidateFieldValue(
-        FieldName fieldName,
-        Option<object> fieldValue
-    ) => from v1 in base.ValidateFieldValue(fieldName, fieldValue)
-         from v2 in Validate(fieldName, v1)
-         select v2;
-
-    private Validation<string, Option<object>> Validate(FieldName fieldName, Option<object> fieldValue) =>
+    public Validation<string, Option<object>> ValidateFieldValue(FieldName fieldName, Option<object> fieldValue) =>
         fieldValue
            .Map(value => (string) value)
            .Map(value => value.Length >= _minLength)
            .IfNone(true)
             ? fieldValue
             : $"Value for field '{fieldName} violates 'Min Length' specification";
+
+    public int Order => int.MinValue + 4;
 }
 
-public sealed class MaxLengthSpecification : CommonFieldSpecification<string>
+public sealed class MaxLengthFieldSpecification : IFieldSpecification
 {
     private readonly int _maxLength;
 
-    public MaxLengthSpecification(int maxLength)
+    public MaxLengthFieldSpecification(int maxLength)
     {
         _maxLength = maxLength;
     }
 
-    public override int Order => 2;
-
-    public override Validation<string, Option<object>> ValidateFieldValue(
-        FieldName fieldName,
-        Option<object> fieldValue
-    ) => from v1 in base.ValidateFieldValue(fieldName, fieldValue)
-         from v2 in Validate(fieldName, v1)
-         select v2;
-
-    private Validation<string, Option<object>> Validate(FieldName fieldName, Option<object> fieldValue) =>
+    public Validation<string, Option<object>> ValidateFieldValue(FieldName fieldName, Option<object> fieldValue) =>
         fieldValue
            .Map(value => (string) value)
            .Map(value => value.Length <= _maxLength)
            .IfNone(true)
             ? fieldValue
             : $"Value for field '{fieldName} violates 'Max Length' specification";
+
+    public int Order => int.MinValue + 5;
 }

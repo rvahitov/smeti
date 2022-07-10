@@ -1,5 +1,6 @@
 ﻿using Grpc.Core;
 using LanguageExt.Common;
+using Smeti.Domain.Models.ItemDefinitionModel;
 using Smeti.Domain.Models.ItemModel;
 
 namespace Smeti.Service.Extensions;
@@ -10,15 +11,27 @@ public static class ErrorExtensions
     {
         var code and >= (int) StatusCode.Cancelled and <= (int) StatusCode.DataLoss =>
             new Status((StatusCode) code, error.Message),
-        ItemErrors.Codes.ItemNotExist =>
+        ItemError.Codes.ItemNotExist =>
             new Status(StatusCode.NotFound, error.Message),
-        ItemErrors.Codes.ItemAlreadyExists =>
+        ItemError.Codes.ItemAlreadyExists =>
             new Status(StatusCode.AlreadyExists, error.Message),
-        ItemErrors.Codes.ItemFieldDuplicates =>
+        ItemError.Codes.ItemFieldDuplicates =>
             new Status(StatusCode.InvalidArgument, error.Message),
-        ItemErrors.Codes.ItemAlreadyHasField =>
+        ItemError.Codes.ItemAlreadyHasField =>
             new Status(StatusCode.InvalidArgument, error.Message),
-        ItemErrors.Codes.ItemNotHaveField =>
+        ItemError.Codes.ItemNotHaveField =>
+            new Status(StatusCode.InvalidArgument, error.Message),
+        ItemDefinitionError.Codes.ItemDefinitionNotExist =>
+            new Status(StatusCode.NotFound, error.Message),
+        ItemDefinitionError.Codes.ItemDefinitionAlreadyExists =>
+            new Status(StatusCode.AlreadyExists, error.Message),
+        ItemDefinitionError.Codes.ItemDefinitionFieldDefinitionDuplicates =>
+            new Status(StatusCode.InvalidArgument, error.Message),
+        ItemDefinitionError.Codes.ItemDefinitionAlreadyHasFieldDefinition =>
+            new Status(StatusCode.InvalidArgument, error.Message),
+        ItemDefinitionError.Codes.ItemDefinitionNotHaveFieldDefinition =>
+            new Status(StatusCode.InvalidArgument, error.Message),
+        ItemDefinitionError.Codes.ItemDefinitionInvalidFieldValue =>
             new Status(StatusCode.InvalidArgument, error.Message),
         _ => new Status(StatusCode.Internal, error.Message, error.ToException())
     };

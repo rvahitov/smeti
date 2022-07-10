@@ -2,11 +2,13 @@
 using Akka.Cluster.Hosting;
 using Akka.Cluster.Sharding;
 using Akka.Configuration;
+using Akka.DependencyInjection;
 using Akka.Hosting;
 using Akka.Persistence.PostgreSql.Hosting;
 using Akka.Remote.Hosting;
 using LanguageExt;
 using Microsoft.Extensions.FileProviders;
+using Smeti.Domain.Models.ItemDefinitionModel;
 using Smeti.Domain.Models.ItemModel;
 
 namespace Smeti.Service.Infrastructure.Akka;
@@ -40,7 +42,13 @@ public static class AkkaHostingService
                     })
                    .WithShardRegion<ItemActor>(
                         KnownShards.Item,
-                        id => Props.Create(() => new ItemActor(id)),
+                        (system, _) => id => DependencyResolver.For(system).Props<ItemActor>(id),
+                        new MessageExtractor(),
+                        shardOptions
+                    )
+                   .WithShardRegion<ItemDefinitionActor>(
+                        KnownShards.ItemDefinition,
+                        id => Props.Create(() => new ItemDefinitionActor(id)),
                         new MessageExtractor(),
                         shardOptions
                     )

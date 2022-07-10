@@ -13,7 +13,8 @@ public sealed record BooleanFieldDefinition(FieldName FieldName, bool IsRequired
 {
     public IEnumerable<IFieldSpecification> GetSpecifications()
     {
-        if(IsRequired) yield return new ValueRequiredFieldSpecification<bool>();
+        yield return new ValueOfTypeSpecification<bool>();
+        if(IsRequired) yield return new ValueRequiredFieldSpecification();
     }
 }
 
@@ -26,13 +27,14 @@ public sealed record IntegerFieldDefinition(
 {
     public IEnumerable<IFieldSpecification> GetSpecifications()
     {
-        var requiredSpecification = IsRequired
-                                        ? Prelude.Some(
-                                            (IFieldSpecification) new ValueRequiredFieldSpecification<long>())
-                                        : Prelude.None;
-        return requiredSpecification
-              .Concat(MinValue.Map(value => new MinValueFieldSpecification<long>(value)))
-              .Concat(MaxValue.Map(value => new MaxValueFieldSpecification<long>(value)));
+        yield return new ValueOfTypeSpecification<long>();
+        if(IsRequired) yield return new ValueRequiredFieldSpecification();
+
+        foreach(var spec in MinValue.Map(value => new MinValueFieldSpecification<long>(value)))
+            yield return spec;
+
+        foreach(var spec in MaxValue.Map(value => new MaxValueFieldSpecification<long>(value)))
+            yield return spec;
     }
 }
 
@@ -45,13 +47,14 @@ public sealed record DecimalFieldDefinition(
 {
     public IEnumerable<IFieldSpecification> GetSpecifications()
     {
-        var requiredSpecification = IsRequired
-                                        ? Prelude.Some(
-                                            (IFieldSpecification) new ValueRequiredFieldSpecification<decimal>())
-                                        : Prelude.None;
-        return requiredSpecification
-              .Concat(MinValue.Map(value => new MinValueFieldSpecification<decimal>(value)))
-              .Concat(MaxValue.Map(value => new MaxValueFieldSpecification<decimal>(value)));
+        yield return new ValueOfTypeSpecification<decimal>();
+        if(IsRequired) yield return new ValueRequiredFieldSpecification();
+
+        foreach(var spec in MinValue.Map(value => new MinValueFieldSpecification<decimal>(value)))
+            yield return spec;
+
+        foreach(var spec in MaxValue.Map(value => new MaxValueFieldSpecification<decimal>(value)))
+            yield return spec;
     }
 }
 
@@ -64,13 +67,14 @@ public sealed record DateTimeFieldDefinition(
 {
     public IEnumerable<IFieldSpecification> GetSpecifications()
     {
-        var requiredSpecification = IsRequired
-                                        ? Prelude.Some(
-                                            (IFieldSpecification) new ValueRequiredFieldSpecification<DateTimeOffset>())
-                                        : Prelude.None;
-        return requiredSpecification
-              .Concat(MinValue.Map(value => new MinValueFieldSpecification<DateTimeOffset>(value)))
-              .Concat(MaxValue.Map(value => new MaxValueFieldSpecification<DateTimeOffset>(value)));
+        yield return new ValueOfTypeSpecification<DateTimeOffset>();
+        if(IsRequired) yield return new ValueRequiredFieldSpecification();
+
+        foreach(var spec in MinValue.Map(value => new MinValueFieldSpecification<DateTimeOffset>(value)))
+            yield return spec;
+
+        foreach(var spec in MaxValue.Map(value => new MaxValueFieldSpecification<DateTimeOffset>(value)))
+            yield return spec;
     }
 }
 
@@ -83,13 +87,14 @@ public sealed record DateFieldDefinition(
 {
     public IEnumerable<IFieldSpecification> GetSpecifications()
     {
-        var requiredSpecification = IsRequired
-                                        ? Prelude.Some(
-                                            (IFieldSpecification) new ValueRequiredFieldSpecification<DateOnly>())
-                                        : Prelude.None;
-        return requiredSpecification
-              .Concat(MinValue.Map(value => new MinValueFieldSpecification<DateOnly>(value)))
-              .Concat(MaxValue.Map(value => new MaxValueFieldSpecification<DateOnly>(value)));
+        yield return new ValueOfTypeSpecification<DateOnly>();
+        if(IsRequired) yield return new ValueRequiredFieldSpecification();
+
+        foreach(var spec in MinValue.Map(value => new MinValueFieldSpecification<DateOnly>(value)))
+            yield return spec;
+
+        foreach(var spec in MaxValue.Map(value => new MaxValueFieldSpecification<DateOnly>(value)))
+            yield return spec;
     }
 }
 
@@ -102,13 +107,14 @@ public sealed record TimeFieldDefinition(
 {
     public IEnumerable<IFieldSpecification> GetSpecifications()
     {
-        var requiredSpecification = IsRequired
-                                        ? Prelude.Some(
-                                            (IFieldSpecification) new ValueRequiredFieldSpecification<TimeOnly>())
-                                        : Prelude.None;
-        return requiredSpecification
-              .Concat(MinValue.Map(value => new MinValueFieldSpecification<TimeOnly>(value)))
-              .Concat(MaxValue.Map(value => new MaxValueFieldSpecification<TimeOnly>(value)));
+        yield return new ValueOfTypeSpecification<TimeOnly>();
+        if(IsRequired) yield return new ValueRequiredFieldSpecification();
+
+        foreach(var spec in MinValue.Map(value => new MinValueFieldSpecification<TimeOnly>(value)))
+            yield return spec;
+
+        foreach(var spec in MaxValue.Map(value => new MaxValueFieldSpecification<TimeOnly>(value)))
+            yield return spec;
     }
 }
 
@@ -121,13 +127,14 @@ public sealed record TextFieldDefinition(
 {
     public IEnumerable<IFieldSpecification> GetSpecifications()
     {
-        var requiredSpecification = IsRequired
-                                        ? Prelude.Some(
-                                            (IFieldSpecification) new ValueRequiredFieldSpecification<string>())
-                                        : Prelude.None;
-        return requiredSpecification
-              .Concat(MinLength.Map(value => new MinLengthFieldSpecification(value)))
-              .Concat(MaxLength.Map(value => new MinLengthFieldSpecification(value)));
+        yield return new ValueOfTypeSpecification<string>();
+        if(IsRequired)
+            yield return new ValueRequiredFieldSpecification();
+
+        foreach(var spec in MinLength.Map(value => new MinLengthFieldSpecification(value)))
+            yield return spec;
+        foreach(var spec in MaxLength.Map(value => new MaxLengthFieldSpecification(value)))
+            yield return spec;
     }
 }
 
@@ -140,12 +147,25 @@ public sealed record TimeSpanFieldDefinition(
 {
     public IEnumerable<IFieldSpecification> GetSpecifications()
     {
-        var requiredSpecification = IsRequired
-                                        ? Prelude.Some(
-                                            (IFieldSpecification) new ValueRequiredFieldSpecification<TimeSpan>())
-                                        : Prelude.None;
-        return requiredSpecification
-              .Concat(MinValue.Map(value => new MinValueFieldSpecification<TimeSpan>(value)))
-              .Concat(MaxValue.Map(value => new MaxValueFieldSpecification<TimeSpan>(value)));
+        yield return new ValueOfTypeSpecification<TimeSpan>();
+        if(IsRequired) yield return new ValueRequiredFieldSpecification();
+
+        foreach(var spec in MinValue.Map(value => new MinValueFieldSpecification<TimeSpan>(value)))
+            yield return spec;
+
+        foreach(var spec in MaxValue.Map(value => new MaxValueFieldSpecification<TimeSpan>(value)))
+            yield return spec;
+    }
+}
+
+public sealed record ReferenceFieldDefinition(
+    FieldName FieldName,
+    bool IsRequired = false
+) : IFieldDefinition
+{
+    public IEnumerable<IFieldSpecification> GetSpecifications()
+    {
+        yield return new ValueOfTypeSpecification<string>();
+        if(IsRequired) yield return new ValueRequiredFieldSpecification();
     }
 }

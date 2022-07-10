@@ -2,7 +2,7 @@
 using LanguageExt.Common;
 using MediatR;
 
-namespace Smeti.Service.Extensions;
+namespace Smeti.Domain.Extensions;
 
 public static class MediatorExtensions
 {

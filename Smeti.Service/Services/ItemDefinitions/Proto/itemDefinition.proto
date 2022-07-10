@@ -1,0 +1,58 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Smeti.Service.Services.ItemDefinitions.Proto";
+
+package itemDefinition;
+import "google/protobuf/wrappers.proto";
+
+service ItemDefinitionsService{
+  rpc GetItemDefinition(GetItemDefinitionRequest) returns (ItemDefinitionOut);
+  rpc CreateItemDefinition(CreateItemDefinitionRequest) returns (ItemDefinitionOut);
+  rpc AddFieldDefinition(AddFieldDefinitionRequest) returns (ItemDefinitionOut);
+  rpc UpdateFieldDefinition(UpdateFieldDefinitionRequest) returns (ItemDefinitionOut);
+}
+
+message GetItemDefinitionRequest {
+  string itemDefinitionId = 1;
+}
+
+message CreateItemDefinitionRequest {
+  string itemDefinitionId = 1;
+  optional google.protobuf.StringValue title = 2;
+  repeated FieldDef fieldDefinitions = 3;
+}
+
+message AddFieldDefinitionRequest {
+  string itemDefinitionId = 1;
+  FieldDef fieldDefinition = 2;
+}
+
+message UpdateFieldDefinitionRequest {
+  string itemDefinitionId = 1;
+  FieldDef fieldDefinition = 2;
+}
+
+
+message ItemDefinitionOut {
+  string id = 1;
+  google.protobuf.StringValue title = 2;
+  repeated FieldDef fieldDefinitions = 3;
+}
+
+message FieldDef {
+  string fieldName = 1;
+  ValueType valueType = 2;
+  bool isRequired = 3;
+}
+
+enum ValueType {
+  boolean = 0;
+  integer = 1;
+  decimal = 2;
+  text = 3;
+  dateTime = 4;
+  date = 5;
+  time = 6;
+  timeSpan = 7;
+  reference = 8;
+}

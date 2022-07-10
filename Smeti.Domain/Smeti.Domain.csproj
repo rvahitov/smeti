@@ -12,6 +12,7 @@
     <PackageReference Include="Autofac" Version="6.4.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
     <PackageReference Include="LanguageExt.Core" Version="4.2.9" />
+    <PackageReference Include="LanguageExt.Transformers" Version="4.2.9" />
     <PackageReference Include="MediatR" Version="10.0.1" />
     <PackageReference Include="NewId" Version="3.0.3" />
   </ItemGroup>

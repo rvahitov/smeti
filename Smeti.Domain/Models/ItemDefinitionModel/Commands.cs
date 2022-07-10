@@ -1,5 +1,6 @@
 ﻿using LanguageExt;
 using Smeti.Domain.Models.Common;
+using Smeti.Domain.Models.ItemModel;
 
 namespace Smeti.Domain.Models.ItemDefinitionModel;
 
@@ -26,4 +27,9 @@ public readonly record struct UpdateFieldDefinitionCommand(
 
 public readonly record struct GetItemDefinitionCommand(
     ItemDefinitionId ItemDefinitionId
+) : IItemDefinitionCommand;
+
+internal readonly record struct ValidateItemFieldsCommand(
+    ItemDefinitionId ItemDefinitionId,
+    Lst<IItemField> Fields
 ) : IItemDefinitionCommand;

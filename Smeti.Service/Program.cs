@@ -4,6 +4,7 @@ using Hocon.Extensions.Configuration;
 using Serilog;
 using Smeti.Service.Infrastructure;
 using Smeti.Service.Infrastructure.Akka;
+using Smeti.Service.Services.ItemDefinitions;
 using Smeti.Service.Services.Items;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +31,7 @@ var app = builder.Build();
 
 app.UseSerilogRequestLogging();
 // Configure the HTTP request pipeline.
+app.MapGrpcService<ItemDefinitionsService>();
 app.MapGrpcService<ItemsService>();
 app.MapGet("/",
     () =>

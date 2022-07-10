@@ -4,7 +4,7 @@ using Smeti.Domain.Models.Common;
 
 namespace Smeti.Domain.Models.ItemModel;
 
-public static class ItemErrors
+public static class ItemError
 {
     public static class Codes
     {

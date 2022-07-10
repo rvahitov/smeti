@@ -4,7 +4,7 @@ using Smeti.Domain.Models.Common;
 
 namespace Smeti.Domain.Models.ItemDefinitionModel;
 
-public class ItemDefinitionErrors
+public class ItemDefinitionError
 {
     public static class Codes
     {
@@ -13,6 +13,7 @@ public class ItemDefinitionErrors
         public const int ItemDefinitionAlreadyHasFieldDefinition = 2_002;
         public const int ItemDefinitionNotHaveFieldDefinition = 2_003;
         public const int ItemDefinitionFieldDefinitionDuplicates = 2_004;
+        public const int ItemDefinitionInvalidFieldValue = 2_005;
     }
 
     public static Error AlreadyExists(ItemDefinitionId id) =>
@@ -40,4 +41,9 @@ public class ItemDefinitionErrors
                 Codes.ItemDefinitionFieldDefinitionDuplicates,
                 $"Failed create item definition '{id}' with duplicate field definitions: {s}")
             );
+
+    public static Error InvalidFieldValue(ItemDefinitionId id, IEnumerable<string> validationErrors) =>
+        string
+           .Join("\n", validationErrors)
+           .Apply(s => Error.New(Codes.ItemDefinitionInvalidFieldValue, $"Invalid field value: {s}"));
 }

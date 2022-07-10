@@ -23,5 +23,8 @@ internal sealed class ItemDefinitionModule : Module
         builder.Register<IRequestHandler<UpdateFieldDefinitionCommand, Either<Error, ItemDefinition>>>(
             ctx => new UpdateFieldDefinitionCommandHandler(ctx.Resolve<IReadOnlyActorRegistry>())
         );
+        builder.Register<IRequestHandler<ValidateItemFieldsCommand, Either<Error, ItemDefinition>>>(
+            ctx => new ValidateItemFieldsCommandHandler(ctx.Resolve<IReadOnlyActorRegistry>())
+        );
     }
 }
