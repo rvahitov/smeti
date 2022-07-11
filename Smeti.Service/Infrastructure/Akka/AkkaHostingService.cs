@@ -6,11 +6,14 @@ using Akka.DependencyInjection;
 using Akka.Hosting;
 using Akka.Persistence.PostgreSql.Hosting;
 using Akka.Remote.Hosting;
+using Akka.Serialization;
 using LanguageExt;
 using Microsoft.Extensions.FileProviders;
 using Smeti.Domain.Models.ItemDefinitionModel;
 using Smeti.Domain.Models.ItemModel;
 using Smeti.Domain.Projections.ItemDefinitions;
+using Smeti.Domain.Projections.Items;
+using Smeti.Service.Infrastructure.Serialization;
 
 namespace Smeti.Service.Infrastructure.Akka;
 
@@ -31,7 +34,13 @@ public static class AkkaHostingService
                     StateStoreMode = StateStoreMode.Persistence
                 };
 
+                var serializerSetup = NewtonSoftJsonSerializerSetup.Create(settings =>
+                {
+                    settings.Converters.Add(new DateOnlyJsonConverter());
+                    settings.Converters.Add(new TimeOnlyJsonConverter());
+                });
                 akkaBuilder
+                   .AddSetup(serializerSetup)
                    .AddHocon(LoadAdditionalConfig(environment))
                    .AddHocon(LoadMainConfig(environment))
                    .WithRemoting("localhost", 1909)
@@ -61,6 +70,12 @@ public static class AkkaHostingService
                                 "item-definition-db-projection"
                             );
                         registry.Register<ItemDefinitionDbProjectionActor>(itemDefinitionDbProjection);
+
+                        var itemDbProjectionActor =
+                            system.ActorOf(dependencyResolver.Props<ItemDbProjectionActor>(),
+                                "item-db-projection"
+                            );
+                        registry.Register<ItemDbProjectionActor>(itemDbProjectionActor);
                     });
             });
     }

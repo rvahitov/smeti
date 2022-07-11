@@ -78,46 +78,6 @@ public sealed record DateTimeFieldDefinition(
     }
 }
 
-public sealed record DateFieldDefinition(
-    FieldName FieldName,
-    bool IsRequired = false,
-    Option<DateOnly> MinValue = default,
-    Option<DateOnly> MaxValue = default
-) : IFieldDefinition
-{
-    public IEnumerable<IFieldSpecification> GetSpecifications()
-    {
-        yield return new ValueOfTypeSpecification<DateOnly>();
-        if(IsRequired) yield return new ValueRequiredFieldSpecification();
-
-        foreach(var spec in MinValue.Map(value => new MinValueFieldSpecification<DateOnly>(value)))
-            yield return spec;
-
-        foreach(var spec in MaxValue.Map(value => new MaxValueFieldSpecification<DateOnly>(value)))
-            yield return spec;
-    }
-}
-
-public sealed record TimeFieldDefinition(
-    FieldName FieldName,
-    bool IsRequired = false,
-    Option<TimeOnly> MinValue = default,
-    Option<TimeOnly> MaxValue = default
-) : IFieldDefinition
-{
-    public IEnumerable<IFieldSpecification> GetSpecifications()
-    {
-        yield return new ValueOfTypeSpecification<TimeOnly>();
-        if(IsRequired) yield return new ValueRequiredFieldSpecification();
-
-        foreach(var spec in MinValue.Map(value => new MinValueFieldSpecification<TimeOnly>(value)))
-            yield return spec;
-
-        foreach(var spec in MaxValue.Map(value => new MaxValueFieldSpecification<TimeOnly>(value)))
-            yield return spec;
-    }
-}
-
 public sealed record TextFieldDefinition(
     FieldName FieldName,
     bool IsRequired = false,

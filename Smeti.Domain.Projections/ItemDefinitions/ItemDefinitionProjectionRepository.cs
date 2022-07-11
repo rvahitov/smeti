@@ -50,10 +50,6 @@ internal static class ItemDefinitionProjectionRepository
                 importer.WriteNull();                     //max_decimal_value
                 importer.WriteNull();                     //min_date_time_value
                 importer.WriteNull();                     //max_date_time_value
-                importer.WriteNull();                     //min_date_value
-                importer.WriteNull();                     //max_date_value
-                importer.WriteNull();                     //min_time_value
-                importer.WriteNull();                     //max_time_value
                 importer.WriteNull();                     //min_time_span_value
                 importer.WriteNull();                     //max_time_span_value
                 importer.WriteNull();                     //min_length
@@ -98,10 +94,6 @@ internal static class ItemDefinitionProjectionRepository
                 importer.WriteNull();       //max_decimal_value
                 importer.WriteNull();       //min_date_time_value
                 importer.WriteNull();       //max_date_time_value
-                importer.WriteNull();       //min_date_value
-                importer.WriteNull();       //max_date_value
-                importer.WriteNull();       //min_time_value
-                importer.WriteNull();       //max_time_value
                 importer.WriteNull();       //min_time_span_value
                 importer.WriteNull();       //max_time_span_value
                 importer.WriteNull();       //min_length
@@ -117,10 +109,6 @@ internal static class ItemDefinitionProjectionRepository
                 importer.WriteNull();       //max_decimal_value
                 importer.WriteNull();       //min_date_time_value
                 importer.WriteNull();       //max_date_time_value
-                importer.WriteNull();       //min_date_value
-                importer.WriteNull();       //max_date_value
-                importer.WriteNull();       //min_time_value
-                importer.WriteNull();       //max_time_value
                 importer.WriteNull();       //min_time_span_value
                 importer.WriteNull();       //max_time_span_value
                 importer.WriteNull();       //min_length
@@ -136,10 +124,6 @@ internal static class ItemDefinitionProjectionRepository
                 importer.WriteOption(max);  //max_decimal_value
                 importer.WriteNull();       //min_date_time_value
                 importer.WriteNull();       //max_date_time_value
-                importer.WriteNull();       //min_date_value
-                importer.WriteNull();       //max_date_value
-                importer.WriteNull();       //min_time_value
-                importer.WriteNull();       //max_time_value
                 importer.WriteNull();       //min_time_span_value
                 importer.WriteNull();       //max_time_span_value
                 importer.WriteNull();       //min_length
@@ -155,52 +139,10 @@ internal static class ItemDefinitionProjectionRepository
                 importer.WriteNull();       //max_decimal_value
                 importer.WriteOption(min);  //min_date_time_value
                 importer.WriteOption(max);  //max_date_time_value
-                importer.WriteNull();       //min_date_value
-                importer.WriteNull();       //max_date_value
-                importer.WriteNull();       //min_time_value
-                importer.WriteNull();       //max_time_value
                 importer.WriteNull();       //min_time_span_value
                 importer.WriteNull();       //max_time_span_value
                 importer.WriteNull();       //min_length
                 importer.WriteNull();       //max_length
-                break;
-            case DateFieldDefinition(var name, var isRequired, var min, var max):
-                importer.Write(name.Value);                   //field_name
-                importer.Write("Date");                       //field_value_type
-                importer.Write(isRequired);                   //is_required
-                importer.WriteNull();                         //min_integer_value
-                importer.WriteNull();                         //max_integer_value
-                importer.WriteNull();                         //max_decimal_value
-                importer.WriteNull();                         //max_decimal_value
-                importer.WriteNull();                         //min_date_time_value
-                importer.WriteNull();                         //max_date_time_value
-                importer.WriteOption(min, NpgsqlDbType.Date); //min_date_value
-                importer.WriteOption(max, NpgsqlDbType.Date); //max_date_value
-                importer.WriteNull();                         //min_time_value
-                importer.WriteNull();                         //max_time_value
-                importer.WriteNull();                         //min_time_span_value
-                importer.WriteNull();                         //max_time_span_value
-                importer.WriteNull();                         //min_length
-                importer.WriteNull();                         //max_length
-                break;
-            case TimeFieldDefinition(var name, var isRequired, var min, var max):
-                importer.Write(name.Value);                   //field_name
-                importer.Write("Time");                       //field_value_type
-                importer.Write(isRequired);                   //is_required
-                importer.WriteNull();                         //min_integer_value
-                importer.WriteNull();                         //max_integer_value
-                importer.WriteNull();                         //max_decimal_value
-                importer.WriteNull();                         //max_decimal_value
-                importer.WriteNull();                         //min_date_time_value
-                importer.WriteNull();                         //max_date_time_value
-                importer.WriteNull();                         //min_date_value
-                importer.WriteNull();                         //max_date_value
-                importer.WriteOption(min, NpgsqlDbType.Time); //min_time_value
-                importer.WriteOption(max, NpgsqlDbType.Time); //max_time_value
-                importer.WriteNull();                         //min_time_span_value
-                importer.WriteNull();                         //max_time_span_value
-                importer.WriteNull();                         //min_length
-                importer.WriteNull();                         //max_length
                 break;
             case TimeSpanFieldDefinition(var name, var isRequired, var min, var max):
                 importer.Write(name.Value);                       //field_name
@@ -212,10 +154,6 @@ internal static class ItemDefinitionProjectionRepository
                 importer.WriteNull();                             //max_decimal_value
                 importer.WriteNull();                             //min_date_time_value
                 importer.WriteNull();                             //max_date_time_value
-                importer.WriteNull();                             //min_date_value
-                importer.WriteNull();                             //max_date_value
-                importer.WriteNull();                             //min_time_value
-                importer.WriteNull();                             //max_time_value
                 importer.WriteOption(min, NpgsqlDbType.Interval); //min_time_span_value
                 importer.WriteOption(max, NpgsqlDbType.Interval); //max_time_span_value
                 importer.WriteNull();                             //min_length
@@ -231,10 +169,6 @@ internal static class ItemDefinitionProjectionRepository
                 importer.WriteNull();       //max_decimal_value
                 importer.WriteNull();       //min_date_time_value
                 importer.WriteNull();       //max_date_time_value
-                importer.WriteNull();       //min_date_value
-                importer.WriteNull();       //max_date_value
-                importer.WriteNull();       //min_time_value
-                importer.WriteNull();       //max_time_value
                 importer.WriteNull();       //min_time_span_value
                 importer.WriteNull();       //max_time_span_value
                 importer.WriteOption(min);  //min_length
@@ -250,10 +184,6 @@ internal static class ItemDefinitionProjectionRepository
                 importer.WriteNull();        //max_decimal_value
                 importer.WriteNull();        //min_date_time_value
                 importer.WriteNull();        //max_date_time_value
-                importer.WriteNull();        //min_date_value
-                importer.WriteNull();        //max_date_value
-                importer.WriteNull();        //min_time_value
-                importer.WriteNull();        //max_time_value
                 importer.WriteNull();        //min_time_span_value
                 importer.WriteNull();        //max_time_span_value
                 importer.WriteNull();        //min_length
@@ -277,10 +207,6 @@ copy tmp_item_definition (
                           max_decimal_value,
                           min_date_time_value,
                           max_date_time_value,
-                          min_date_value,
-                          max_date_value,
-                          min_time_value,
-                          max_time_value,
                           min_time_span_value,
                           max_time_span_value,
                           min_length,
@@ -305,10 +231,6 @@ create temp table tmp_item_definition
     max_decimal_value   decimal       null,
     min_date_time_value timestamptz   null,
     max_date_time_value timestamptz   null,
-    min_date_value      date          null,
-    max_date_value      date          null,
-    min_time_value      time          null,
-    max_time_value      time          null,
     min_time_span_value interval      null,
     max_time_span_value interval      null,
     min_length          int           null,
@@ -336,10 +258,6 @@ insert into field_definition (item_definition_id,
                               max_decimal_value,
                               min_date_time_value,
                               max_date_time_value,
-                              min_date_value,
-                              max_date_value,
-                              min_time_value,
-                              max_time_value,
                               min_time_span_value,
                               max_time_span_value,
                               min_length,
@@ -354,10 +272,6 @@ select t.id,
        t.max_decimal_value,
        t.min_date_time_value,
        t.max_date_time_value,
-       t.min_date_value,
-       t.max_date_value,
-       t.min_time_value,
-       t.max_time_value,
        t.min_time_span_value,
        t.max_time_span_value,
        t.min_length,
@@ -372,12 +286,8 @@ set field_value_type    = t.field_value_type,
     max_integer_value   = t.min_integer_value,
     min_decimal_value   = t.min_decimal_value,
     max_decimal_value   = t.max_decimal_value,
-    min_date_time_value = t.min_date_value,
+    min_date_time_value = t.min_date_time_value,
     max_date_time_value = t.max_date_time_value,
-    min_date_value      = t.min_date_value,
-    max_date_value      = t.max_date_value,
-    min_time_value      = t.min_time_value,
-    max_time_value      = t.max_time_value,
     min_time_span_value = t.min_time_span_value,
     max_time_span_value = t.max_time_span_value,
     min_length          = t.min_length,
@@ -385,6 +295,7 @@ set field_value_type    = t.field_value_type,
 from (select *
       from tmp_item_definition) t
 where fd.item_definition_id = t.id
+    and fd.field_name = t.field_name
   and t.op_type = 'update_field_definition';
 ");
     }

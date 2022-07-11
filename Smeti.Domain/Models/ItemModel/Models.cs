@@ -37,16 +37,6 @@ public sealed record DateTimeField(FieldName FieldName, Option<DateTimeOffset> V
     public Option<object> GetValue() => Value.Map(v => (object)v);
 }
 
-public sealed record DateField(FieldName FieldName, Option<DateOnly> Value) : IItemField
-{
-    public Option<object> GetValue() => Value.Map(v => (object)v);
-}
-
-public sealed record TimeField(FieldName FieldName, Option<TimeOnly> Value) : IItemField
-{
-    public Option<object> GetValue() => Value.Map(v => (object)v);
-}
-
 public sealed record TimeSpanField(FieldName FieldName, Option<TimeSpan> Value) : IItemField
 {
     public Option<object> GetValue() => Value.Map(v => (object)v);

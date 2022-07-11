@@ -35,11 +35,9 @@ public static class ProtoExtensions
         return fieldDef.ValueType switch
         {
             ValueType.Boolean   => new BooleanFieldDefinition(fieldName, fieldDef.IsRequired),
-            ValueType.Integer   => new BooleanFieldDefinition(fieldName, fieldDef.IsRequired),
+            ValueType.Integer   => new IntegerFieldDefinition(fieldName, fieldDef.IsRequired),
             ValueType.Decimal   => new DecimalFieldDefinition(fieldName, fieldDef.IsRequired),
             ValueType.DateTime  => new DateTimeFieldDefinition(fieldName, fieldDef.IsRequired),
-            ValueType.Date      => new DateFieldDefinition(fieldName, fieldDef.IsRequired),
-            ValueType.Time      => new TimeFieldDefinition(fieldName, fieldDef.IsRequired),
             ValueType.TimeSpan  => new TimeSpanFieldDefinition(fieldName, fieldDef.IsRequired),
             ValueType.Text      => new TextFieldDefinition(fieldName, fieldDef.IsRequired),
             ValueType.Reference => new ReferenceFieldDefinition(fieldName, fieldDef.IsRequired),
@@ -57,10 +55,6 @@ public static class ProtoExtensions
             new FieldDef { FieldName = name.Value, ValueType = ValueType.Decimal, IsRequired = isRequired },
         DateTimeFieldDefinition(var name, var isRequired, _, _) =>
             new FieldDef { FieldName = name.Value, ValueType = ValueType.DateTime, IsRequired = isRequired },
-        DateFieldDefinition(var name, var isRequired, _, _) =>
-            new FieldDef { FieldName = name.Value, ValueType = ValueType.Date, IsRequired = isRequired },
-        TimeFieldDefinition(var name, var isRequired, _, _) =>
-            new FieldDef { FieldName = name.Value, ValueType = ValueType.Time, IsRequired = isRequired },
         TimeSpanFieldDefinition(var name, var isRequired, _, _) =>
             new FieldDef { FieldName = name.Value, ValueType = ValueType.TimeSpan, IsRequired = isRequired },
         TextFieldDefinition(var name, var isRequired, _, _) =>

@@ -51,8 +51,6 @@ enum ValueType {
   decimal = 2;
   text = 3;
   dateTime = 4;
-  date = 5;
-  time = 6;
-  timeSpan = 7;
-  reference = 8;
+  timeSpan = 5;
+  reference = 6;
 }

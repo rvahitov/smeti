@@ -58,14 +58,6 @@ public static class ProtoExtensions
                 var dateTimeField = new Field { Name = name.Value, ValueType = ValueType.DateTime, DateTime = null };
                 value.Iter(v => dateTimeField.DateTime = v.ToString("O"));
                 return dateTimeField;
-            case DateField(var name, var value):
-                var dateField = new Field { Name = name.Value, ValueType = ValueType.Date, Date = null };
-                value.Iter(v => dateField.Date = v.ToString("O"));
-                return dateField;
-            case TimeField(var name, var value):
-                var timeField = new Field { Name = name.Value, ValueType = ValueType.Time, Time = null };
-                value.Iter(v => timeField.Text = v.ToString("O"));
-                return timeField;
             case ReferenceField(var name, var value):
                 var referenceField = new Field { Name = name.Value, ValueType = ValueType.Reference, Reference = null };
                 value.Iter(v => referenceField.Reference = v.Value);
@@ -101,16 +93,6 @@ public static class ProtoExtensions
                              .Optional(field.DateTime)
                              .Map(DateTimeOffset.Parse)
                              .Apply(value => new DateTimeField(new FieldName(field.Name), value)),
-
-        ValueType.Date => Prelude
-                         .Optional(field.Date)
-                         .Map(DateOnly.Parse)
-                         .Apply(value => new DateField(new FieldName(field.Name), value)),
-
-        ValueType.Time => Prelude
-                         .Optional(field.Time)
-                         .Map(TimeOnly.Parse)
-                         .Apply(value => new TimeField(new FieldName(field.Name), value)),
 
         ValueType.Reference => Prelude
                               .Optional(field.Reference)

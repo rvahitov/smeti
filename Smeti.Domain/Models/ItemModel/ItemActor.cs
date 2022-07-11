@@ -99,25 +99,16 @@ public sealed class ItemActor : ReceivePersistentActor
     {
         var (itemId, itemField) = command;
 
-        var itemDefinitionId = _state.Map(s => s.ItemDefinitionId);
-
-        if(itemDefinitionId.IsNone)
-        {
-            Sender.Tell(Prelude.Left<Error, Item>(ItemError.NotExist(itemId)));
-            return;
-        }
-
-        if(_state.Map(s => s.Fields.ContainsKey(itemField.FieldName)).IfNone(true) == false)
-        {
-            Sender.Tell(Prelude.Left<Error, Item>(ItemError.NotHaveField(itemId, itemField.FieldName)));
-            return;
-        }
-
-        var validateCommand = new ValidateItemFieldsCommand(itemDefinitionId.ValueUnsafe(), List.create(itemField));
         var errorOrEvent =
-            await _mediator
-                 .TrySend(validateCommand)
-                 .Map(_ => new FieldUpdatedEvent(itemId, itemField, DateTimeOffset.Now));
+            await (from state in GetState(itemId).ToAsync()
+                   from _1 in state.Fields.Find(itemField.FieldName)
+                                   .ToEither(ItemError.NotHaveField(itemId, itemField.FieldName))
+                                   .ToAsync()
+                   let validateCommand = new ValidateItemFieldsCommand(state.ItemDefinitionId, List.create(itemField))
+                   from _2 in _mediator.TrySend(validateCommand)
+                   select new FieldUpdatedEvent(itemId, itemField, DateTimeOffset.Now));
+
+
         Prelude.match(
             errorOrEvent,
             @event => Persist(@event, OnEventPersisted),
