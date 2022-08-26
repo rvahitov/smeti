@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Akka.Hosting" Version="0.3.4" />
-    <PackageReference Include="Akka.Persistence" Version="1.4.39" />
+    <PackageReference Include="Akka.Hosting" Version="0.4.2" />
+    <PackageReference Include="Akka.Persistence" Version="1.4.40" />
     <PackageReference Include="Autofac" Version="6.4.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
     <PackageReference Include="LanguageExt.Core" Version="4.2.9" />
