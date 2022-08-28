@@ -1,35 +1,47 @@
-﻿using LanguageExt;
-using LanguageExt.Common;
-using Smeti.Domain.Models.Common;
+﻿using Smeti.Domain.Common;
+using Smeti.Domain.Common.Errors;
+using Smeti.Domain.Models.ItemDefinitionModel;
 
 namespace Smeti.Domain.Models.ItemModel;
 
-public static class ItemError
+public readonly record struct ItemNotExistError(ItemId ItemId) : IDomainError;
+
+public readonly record struct ItemAlreadyExistError(ItemId ItemId) : IDomainError;
+
+public readonly record struct ItemDeletedError(ItemId ItemId) : IDomainError;
+
+public readonly record struct ItemFieldDuplicateError(ItemId ItemId, IReadOnlyCollection<FieldName> FieldNames)
+    : IDomainError;
+
+public readonly record struct ItemAlreadyHasFieldError(ItemId ItemId, FieldName FieldName) : IDomainError;
+
+public readonly record struct ItemDoesNotHaveFieldError(ItemId ItemId, FieldName FieldName) : IDomainError;
+
+public readonly record struct ItemFieldsVerificationError(
+    ItemId ItemId,
+    ItemDefinitionId ItemDefinitionId,
+    IReadOnlyCollection<(FieldName, InvalidFieldReason)> InvalidFields
+) : IDomainError;
+
+public sealed class ItemError
 {
-    public static class Codes
-    {
-        public const int ItemAlreadyExists = 3_000;
-        public const int ItemNotExist = 3_001;
-        public const int ItemAlreadyHasField = 3_002;
-        public const int ItemNotHaveField = 3_003;
-        public const int ItemFieldDuplicates = 3_004;
-    }
+    public static IDomainError ItemNotExist(ItemId itemId) => new ItemNotExistError(itemId);
+    public static IDomainError ItemAlreadyExist(ItemId itemId) => new ItemAlreadyExistError(itemId);
 
-    public static Error AlreadyExists(ItemId itemId) =>
-        Error.New(Codes.ItemAlreadyExists, $"Item '{itemId}' already exists");
+    public static IDomainError FieldDuplicates(ItemId itemId, IReadOnlyCollection<FieldName> fieldNames) =>
+        new ItemFieldDuplicateError(itemId, fieldNames);
 
-    public static Error NotExist(ItemId itemId) =>
-        Error.New(Codes.ItemNotExist, $"Item '{itemId}' does not exist");
+    public static IDomainError AlreadyHasField(ItemId itemId, FieldName fieldName) =>
+        new ItemAlreadyHasFieldError(itemId, fieldName);
 
-    public static Error AlreadyHasField(ItemId itemId, FieldName fieldName) =>
-        Error.New(Codes.ItemAlreadyHasField, $"Item '{itemId}' already has field '{fieldName}'");
+    public static IDomainError DoesNotHaveField(ItemId itemId, FieldName fieldName) =>
+        new ItemDoesNotHaveFieldError(itemId, fieldName);
 
-    public static Error NotHaveField(ItemId itemId, FieldName fieldName) =>
-        Error.New(Codes.ItemNotHaveField, $"Item '{itemId}' does not have field '{fieldName}'");
+    public static IDomainError Deleted(ItemId itemId) => new ItemDeletedError(itemId);
 
-    public static Error FieldsDuplicates(ItemId itemId, IEnumerable<FieldName> fieldNames) =>
-        string
-           .Join(", ", fieldNames)
-           .Apply(s => Error.New(Codes.ItemFieldDuplicates,
-                $"Failed create item '{itemId}' with duplicate fields: {s}"));
+    public static IDomainError InvalidFields(
+        ItemId itemId,
+        ItemDefinitionId itemDefinitionId,
+        IReadOnlyCollection<(FieldName, InvalidFieldReason)> invalidFields) =>
+        new ItemFieldsVerificationError(itemId, itemDefinitionId, invalidFields);
 }

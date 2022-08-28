@@ -1,35 +1,21 @@
-﻿using LanguageExt;
-using Smeti.Domain.Models.Common;
-using Smeti.Domain.Models.ItemModel;
+﻿using Smeti.Domain.Common;
 
 namespace Smeti.Domain.Models.ItemDefinitionModel;
 
-public interface IItemDefinitionCommand : ICommand<ItemDefinition>
+public interface IItemDefinitionCommand : IDomainCommand<ItemDefinition>
 {
     ItemDefinitionId ItemDefinitionId { get; }
 }
 
-public readonly record struct CreateItemDefinitionCommand(
+public sealed record CreateItemDefinitionCommand(
     ItemDefinitionId ItemDefinitionId,
-    Option<ItemDefinitionTitle> ItemDefinitionTitle,
-    Lst<IFieldDefinition> FieldDefinitions
+    ItemDefinitionName ItemDefinitionName
 ) : IItemDefinitionCommand;
 
-public readonly record struct AddFieldDefinitionCommand(
-    ItemDefinitionId ItemDefinitionId,
-    IFieldDefinition FieldDefinition
-) : IItemDefinitionCommand;
+public sealed record AddFieldDefinitionCommand(ItemDefinitionId ItemDefinitionId, FieldDefinition FieldDefinition)
+    : IItemDefinitionCommand;
 
-public readonly record struct UpdateFieldDefinitionCommand(
-    ItemDefinitionId ItemDefinitionId,
-    IFieldDefinition FieldDefinition
-) : IItemDefinitionCommand;
+public sealed record RemoveFieldDefinitionCommand(ItemDefinitionId ItemDefinitionId, FieldName FieldName)
+    : IItemDefinitionCommand;
 
-public readonly record struct GetItemDefinitionCommand(
-    ItemDefinitionId ItemDefinitionId
-) : IItemDefinitionCommand;
-
-internal readonly record struct ValidateItemFieldsCommand(
-    ItemDefinitionId ItemDefinitionId,
-    Lst<IItemField> Fields
-) : IItemDefinitionCommand;
+public sealed record GetItemDefinitionCommand(ItemDefinitionId ItemDefinitionId): IItemDefinitionCommand;

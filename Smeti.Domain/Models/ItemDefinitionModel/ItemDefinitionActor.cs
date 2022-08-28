@@ -1,157 +1,103 @@
 ﻿using Akka.Actor;
 using Akka.Persistence;
+using JetBrains.Annotations;
 using LanguageExt;
-using LanguageExt.Common;
-using Smeti.Domain.Models.Common;
-using Smeti.Domain.Models.ItemModel;
+using Smeti.Domain.Common.Errors;
 
 namespace Smeti.Domain.Models.ItemDefinitionModel;
 
 public sealed class ItemDefinitionActor : ReceivePersistentActor
 {
-    private Option<ItemDefinitionState> _state;
+    private Option<ItemDefinitionActorState> _state;
 
+    [UsedImplicitly]
     public ItemDefinitionActor(string persistenceId)
     {
         PersistenceId = persistenceId;
-
-        Command<CreateItemDefinitionCommand>(HandleCommand);
-        Command<AddFieldDefinitionCommand>(HandleCommand);
-        Command<UpdateFieldDefinitionCommand>(HandleCommand);
-        Command<ValidateItemFieldsCommand>(HandleCommand);
-        Command<GetItemDefinitionCommand>(HandleCommand);
+        _state = Prelude.None;
 
         Recover<IItemDefinitionEvent>(ApplyEvent);
-
-        Recover<SnapshotOffer>(offer =>
-        {
-            if(offer.Snapshot is ItemDefinitionState state)
-                _state = state;
-        });
+        Recover<SnapshotOffer>(ApplySnapshot);
+        Command<IItemDefinitionCommand>(HandleCommand);
     }
 
     public override string PersistenceId { get; }
 
-    private void HandleCommand(CreateItemDefinitionCommand command)
+    private void HandleCommand(IItemDefinitionCommand command)
     {
-        var (id, title, fieldDefinitions) = command;
-        if(_state.IsSome)
+        if(command is GetItemDefinitionCommand(var id))
         {
-            Sender.Tell(Prelude.Left<Error, ItemDefinition>(ItemDefinitionError.AlreadyExists(id)));
+            Reply(id);
             return;
         }
 
-        var duplicates = FindDuplicates(fieldDefinitions);
-        if(duplicates.Count > 0)
+        var errorOrEvent = GetEventForCommand(command);
+        switch(errorOrEvent.Case)
         {
-            Sender.Tell(
-                Prelude.Left<Error, ItemDefinition>(ItemDefinitionError.FieldDefinitionsDuplicates(id, duplicates))
-            );
-            return;
+            case IDomainError error:
+                Reply(error);
+                return;
+            case IItemDefinitionEvent @event:
+                Persist(@event, OnEventPersisted);
+                break;
         }
-
-        Persist(new ItemDefinitionCreatedEvent(id, title, fieldDefinitions), OnEventPersisted);
     }
 
-    private void HandleCommand(AddFieldDefinitionCommand command)
-    {
-        var (id, fieldDefinition) = command;
-
-        var errorOrEvent =
-            GetState(id)
-               .Bind(state => state.FieldDefinitions.ContainsKey(fieldDefinition.FieldName)
-                                  ? Prelude.Left<Error, IItemDefinitionEvent>(
-                                      ItemDefinitionError.AlreadyHasFieldDefinition(id, fieldDefinition.FieldName))
-                                  : Prelude.Right<Error, IItemDefinitionEvent>(
-                                      new FieldDefinitionAddedEvent(id, fieldDefinition))
-                );
-        Prelude.match(
-            errorOrEvent,
-            @event => Persist(@event, OnEventPersisted),
-            error => Sender.Tell(Prelude.Left<Error, ItemDefinition>(error))
-        );
-    }
-
-    private void HandleCommand(UpdateFieldDefinitionCommand command)
-    {
-        var (id, fieldDefinition) = command;
-        var currentDefinition =
-            GetState(id)
-               .Bind(
-                    s => s.FieldDefinitions
-                          .Find(fieldDefinition.FieldName)
-                          .ToEither(ItemDefinitionError.NotHaveFieldDefinition(id, fieldDefinition.FieldName))
-                );
-        Prelude.match
-        (
-            currentDefinition,
-            current =>
-            {
-                if(current == fieldDefinition)
-                {
-                    Sender.Tell(GetModel(id));
-                }
-                else
-                {
-                    var @event = new FieldDefinitionUpdatedEvent(id, fieldDefinition);
-                    Persist(@event, OnEventPersisted);
-                }
-            },
-            error => { Sender.Tell(Prelude.Left<Error, ItemDefinition>(error)); }
-        );
-    }
-
-    private void HandleCommand(ValidateItemFieldsCommand command)
-    {
-        var (id, itemFields) = command;
-        if(_state.IsNone)
+    private Either<IDomainError, IItemDefinitionEvent> GetEventForCommand(IItemDefinitionCommand command) =>
+        command switch
         {
-            Sender.Tell(Prelude.Left<Error, ItemDefinition>(ItemDefinitionError.NotExist(id)));
-            return;
-        }
+            CreateItemDefinitionCommand c  => GetEventForCommand(c),
+            AddFieldDefinitionCommand c    => GetEventForCommand(c),
+            RemoveFieldDefinitionCommand c => GetEventForCommand(c),
+            _ => Prelude.Left<IDomainError, IItemDefinitionEvent>(
+                CommonError.UnknownCommand(command.GetType().FullName!)
+            )
+        };
 
-        foreach(var itemField in itemFields.Where(itemField =>
-                    _state.Map(s => s.FieldDefinitions.ContainsKey(itemField.FieldName)).IfNone(false) == false))
+    private Either<IDomainError, IItemDefinitionEvent> GetEventForCommand(CreateItemDefinitionCommand command)
+    {
+        var (id, name) = command;
+        return _state.Case switch
         {
-            Sender.Tell(
-                Prelude.Left<Error, ItemDefinition>(
-                    ItemDefinitionError.NotHaveFieldDefinition(id, itemField.FieldName)
-                )
-            );
-            return;
-        }
-
-        var response =
-            itemFields
-               .Select(Validate)
-               .SelectMany(v => v.FailAsEnumerable())
-               .Freeze()
-               .Apply(
-                    validationErrors => validationErrors.Count == 0
-                                            ? _state.Map(s => s.ToModel(id)).ToEither(ItemDefinitionError.NotExist(id))
-                                            : Prelude.Left<Error, ItemDefinition>(
-                                                ItemDefinitionError.InvalidFieldValue(id, validationErrors))
-                );
-        Sender.Tell(response);
+            null => new ItemDefinitionCreatedEvent(id, name, DateTimeOffset.Now),
+            _    => Prelude.Left<IDomainError, IItemDefinitionEvent>(ItemDefinitionError.AlreadyExist(id))
+        };
     }
 
-    private void HandleCommand(GetItemDefinitionCommand command)
+    private Either<IDomainError, IItemDefinitionEvent> GetEventForCommand(AddFieldDefinitionCommand command)
     {
-        Sender.Tell(GetModel(command.ItemDefinitionId));
+        var (id, fd) = command;
+        var (fieldName, _) = fd;
+        return _state.Case switch
+        {
+            null => Prelude.Left<IDomainError, IItemDefinitionEvent>(ItemDefinitionError.NotExist(id)),
+            ItemDefinitionActorState { FieldDefinitions: var defs } when defs.ContainsKey(fieldName) =>
+                Prelude.Left<IDomainError, IItemDefinitionEvent>(
+                    ItemDefinitionError.AlreadyHasFieldDefinition(id, fieldName)
+                ),
+            _ => new FieldDefinitionAddedEvent(id, fd, DateTimeOffset.Now)
+        };
     }
 
-    private Validation<string, IItemField> Validate(IItemField itemField)
+    private Either<IDomainError, IItemDefinitionEvent> GetEventForCommand(RemoveFieldDefinitionCommand command)
     {
-        var specifications = _state.Bind(s => s.FieldDefinitions.Find(itemField.FieldName))
-                                   .SelectMany(fd => fd.GetSpecifications())
-                                   .OrderBy(spec => spec.Order);
-        foreach(var spec in specifications)
+        var (id, fieldName) = command;
+        return _state.Case switch
         {
-            var validation = spec.ValidateFieldValue(itemField.FieldName, itemField.GetValue());
-            if(validation.IsFail) return validation.Map(_ => itemField);
-        }
+            null => Prelude.Left<IDomainError, IItemDefinitionEvent>(ItemDefinitionError.NotExist(id)),
+            ItemDefinitionActorState { FieldDefinitions: var defs } when defs.ContainsKey(fieldName) == false =>
+                Prelude.Left<IDomainError, IItemDefinitionEvent>(ItemDefinitionError.DoesNotHaveFieldDefinition(
+                    id, fieldName
+                )),
+            _ => new FieldDefinitionRemovedEvent(id, fieldName, DateTimeOffset.Now)
+        };
+    }
 
-        return Prelude.Success<string, IItemField>(itemField);
+    private void OnEventPersisted(IItemDefinitionEvent @event)
+    {
+        ApplyEvent(@event);
+        SaveSnapshot();
+        Reply(@event.ItemDefinitionId);
     }
 
     private void ApplyEvent(IItemDefinitionEvent @event)
@@ -159,26 +105,33 @@ public sealed class ItemDefinitionActor : ReceivePersistentActor
         _state = _state.ApplyEvent(@event);
     }
 
-    private void OnEventPersisted(IItemDefinitionEvent @event)
+    private void ApplySnapshot(SnapshotOffer offer)
     {
-        ApplyEvent(@event);
-        var id = @event.ItemDefinitionId;
-        Sender.Tell(_state.Map(s => s.ToModel(id)).ToEither(ItemDefinitionError.NotExist(id)));
-        _state.Filter(_ => LastSequenceNr % 500 == 0).Iter(SaveSnapshot);
+        if(offer.Snapshot is ItemDefinitionActorState state)
+        {
+            _state = state;
+        }
     }
 
-    private static Lst<FieldName> FindDuplicates(IEnumerable<IFieldDefinition> fields) =>
-        fields
-           .Select(f => f.FieldName)
-           .Aggregate(
-                Map.empty<FieldName, int>(),
-                (map, fieldName) => map.AddOrUpdate(fieldName, count => count + 1, () => 1)
-            )
-           .Filter(count => count > 1)
-           .Apply(map => map.Keys.Freeze());
+    private void SaveSnapshot()
+    {
+        if(LastSequenceNr % 500 == 0)
+        {
+            _state.Iter(SaveSnapshot);
+        }
+    }
 
-    private Either<Error, ItemDefinitionState> GetState(ItemDefinitionId id) =>
-        _state.ToEither(ItemDefinitionError.NotExist(id));
+    private void Reply(ItemDefinitionId itemDefinitionId)
+    {
+        Sender.Tell(
+            _state
+               .Map(s => s.ToItemDefinition(itemDefinitionId))
+               .ToEither(ItemDefinitionError.NotExist(itemDefinitionId))
+        );
+    }
 
-    private Either<Error, ItemDefinition> GetModel(ItemDefinitionId id) => GetState(id).Map(s => s.ToModel(id));
+    private void Reply(IDomainError domainError)
+    {
+        Sender.Tell(Prelude.Left<IDomainError, ItemDefinition>(domainError));
+    }
 }

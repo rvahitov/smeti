@@ -1,21 +1,23 @@
 ﻿using LanguageExt;
+using Smeti.Domain.Common;
 using Smeti.Domain.Models.ItemDefinitionModel;
 
 namespace Smeti.Domain.Models.ItemModel;
 
-public interface IItemEvent
+public interface IItemEvent : IDomainEvent
 {
     ItemId ItemId { get; }
-    DateTimeOffset Timestamp { get; }
 }
 
 public sealed record ItemCreatedEvent(
     ItemId ItemId,
     ItemDefinitionId ItemDefinitionId,
-    Lst<IItemField> Fields,
+    Lst<IField> Fields,
     DateTimeOffset Timestamp
 ) : IItemEvent;
 
-public sealed record FieldAddedEvent(ItemId ItemId, IItemField Field, DateTimeOffset Timestamp) : IItemEvent;
+public sealed record FieldAddedEvent(ItemId ItemId, IField Field, DateTimeOffset Timestamp) : IItemEvent;
 
-public sealed record FieldUpdatedEvent(ItemId ItemId, IItemField Field, DateTimeOffset Timestamp) : IItemEvent;
+public sealed record FieldRemovedEvent(ItemId ItemId, FieldName FieldName, DateTimeOffset Timestamp) : IItemEvent;
+
+public sealed record ItemDeletedEvent(ItemId ItemId, DateTimeOffset Timestamp) : IItemEvent;
