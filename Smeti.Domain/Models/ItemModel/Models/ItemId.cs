@@ -13,6 +13,11 @@ public readonly struct ItemId : IIdentity, IEquatable<ItemId>
 
     public string Value { get; }
 
+    public void Deconstruct(out string value)
+    {
+        value = Value;
+    }
+
     public bool Equals(ItemId other) => Value == other.Value;
 
     public override bool Equals(object? obj) => obj is ItemId other && Equals(other);

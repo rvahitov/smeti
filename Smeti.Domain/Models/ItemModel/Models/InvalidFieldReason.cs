@@ -3,5 +3,6 @@
 public enum InvalidFieldReason
 {
     NotRegistered,
-    InvalidValueType
+    InvalidValueType,
+    Duplicate
 }

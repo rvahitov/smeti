@@ -23,7 +23,7 @@ public readonly record struct ItemFieldsVerificationError(
     IReadOnlyCollection<(FieldName, InvalidFieldReason)> InvalidFields
 ) : IDomainError;
 
-public sealed class ItemError
+public static  class ItemError
 {
     public static IDomainError ItemNotExist(ItemId itemId) => new ItemNotExistError(itemId);
     public static IDomainError ItemAlreadyExist(ItemId itemId) => new ItemAlreadyExistError(itemId);

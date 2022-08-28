@@ -19,12 +19,6 @@ public readonly record struct ItemDefinitionDoesNotHaveFieldDefinitionError(
     FieldName FieldName
 ) : IDomainError;
 
-public readonly record struct FieldValueValidationError(
-        ItemDefinitionId ItemDefinitionId,
-        IReadOnlyCollection<(FieldName fieldName, string error)> Errors
-    )
-    : IDomainError;
-
 public static class ItemDefinitionError
 {
     public static IDomainError AlreadyExist(ItemDefinitionId itemDefinitionId) =>

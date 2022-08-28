@@ -13,6 +13,11 @@ public readonly struct FieldName : IEquatable<FieldName>
 
     public string Value { get; }
 
+    public void Deconstruct(out string value)
+    {
+        value = Value;
+    }
+
     public bool Equals(FieldName other) => ValueComparer.Equals(Value, other.Value);
 
     public override int GetHashCode() => ValueComparer.GetHashCode(Value);
