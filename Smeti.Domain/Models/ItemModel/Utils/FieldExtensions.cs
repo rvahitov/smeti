@@ -9,9 +9,9 @@ public static class FieldExtensions
         fields
            .Aggregate(
                 Map.empty<FieldName, int>(), // field name with count
-                (map, fieldName) => map.AddOrUpdate(fieldName, count => count + 1, 0)
+                (map, fieldName) => map.AddOrUpdate(fieldName, count => count + 1, 1)
             )
-           .Filter(count => count > 0)
+           .Filter(count => count > 1)
            .Keys
            .Freeze();
 }
