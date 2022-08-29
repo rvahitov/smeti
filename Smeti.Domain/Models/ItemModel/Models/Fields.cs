@@ -10,7 +10,7 @@ public interface IField
     Option<object> GetValue();
 }
 
-public interface IField<T>: IField
+public interface IField<T> : IField
 {
     Option<T> Value { get; }
 }
@@ -37,6 +37,11 @@ public sealed record DoubleField(FieldName FieldName, Option<double> Value) : IF
 
 public sealed record DecimalField(FieldName FieldName, Option<decimal> Value) : IField<decimal>
 {
+    public DecimalField(FieldName fieldName, Option<double> value)
+        : this(fieldName, value.Map(v => (decimal)v))
+    {
+    }
+
     public Option<object> GetValue() => Value.Box();
 }
 

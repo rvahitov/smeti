@@ -1,0 +1,94 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Smeti.Services.Item.Proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+package item;
+
+service ItemService {
+  rpc GetItem(GetItemRequest) returns (Item);
+  rpc CreateItem(CreateItemRequest) returns (Item);
+  rpc AddField(AddFieldRequest) returns (Item);
+  rpc RemoveField(RemoveFieldRequest)  returns (Item);
+  rpc DeleteItem(DeleteItemRequest) returns (Item);
+}
+
+message GetItemRequest {
+  string itemId = 1;
+}
+
+message CreateItemRequest {
+  string itemId = 1;
+  string itemDefinitionId = 2;
+  repeated Field fields = 3;
+}
+
+message AddFieldRequest {
+  string itemId = 1;
+  Field field = 2;
+}
+
+message RemoveFieldRequest {
+  string itemId = 1;
+  string fieldName = 2;
+}
+
+message DeleteItemRequest {
+  string itemId = 1;
+}
+
+message Item {
+  string id = 1;
+  string itemDefinitionId = 2;
+  bool isDeleted = 3;
+  repeated Field fields = 4;
+}
+
+
+message Field {
+  string fieldName = 1;
+  oneof value {
+    BooleanValue boolean = 2;
+    IntegerValue integer = 3;
+    DoubleValue double = 4;
+    DecimalValue decimal = 5;
+    DateTimeValue dateTime = 6;
+    TimeSpanValue timeSpan = 7;
+    StringValue string = 8;
+    ReferenceValue reference = 9;
+  }
+}
+
+message BooleanValue {
+  optional google.protobuf.BoolValue value = 1;
+}
+
+message IntegerValue {
+  optional google.protobuf.Int64Value value = 1;
+}
+
+message DoubleValue {
+  optional google.protobuf.DoubleValue value = 1;
+}
+
+message DecimalValue {
+  optional google.protobuf.DoubleValue value = 1;
+}
+
+message DateTimeValue {
+  optional google.protobuf.Timestamp value = 1;
+}
+
+message TimeSpanValue {
+  optional google.protobuf.Duration value = 1;
+}
+
+message StringValue {
+  optional google.protobuf.StringValue value = 1;
+}
+
+message ReferenceValue {
+  optional google.protobuf.StringValue value = 1;
+}
