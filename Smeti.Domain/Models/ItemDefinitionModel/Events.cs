@@ -2,7 +2,7 @@
 
 namespace Smeti.Domain.Models.ItemDefinitionModel;
 
-public interface IItemDefinitionEvent : IDomainEvent
+public interface IItemDefinitionEvent : IError
 {
     ItemDefinitionId ItemDefinitionId { get; }
 }

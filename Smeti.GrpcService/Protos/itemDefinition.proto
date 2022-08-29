@@ -1,0 +1,52 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Smeti.Services.ItemDefinition.Proto";
+
+package item_definition;
+
+service ItemDefinitionService {
+  rpc CreateItemDefinition(CreateItemDefinitionRequest) returns (ItemDefinition);
+  rpc AddFieldDefinition(AddFieldDefinitionRequest) returns (ItemDefinition);
+  rpc RemoveFieldDefinition(RemoveFieldDefinitionRequest) returns (ItemDefinition);
+  rpc GetItemDefinition(GetItemDefinitionRequest) returns (ItemDefinition);
+}
+
+message CreateItemDefinitionRequest {
+  string itemDefinitionId = 1;
+  string itemDefinitionName = 2;
+}
+
+message AddFieldDefinitionRequest {
+  string itemDefinitionId = 1;
+  FieldDefinition fieldDefinition = 2;
+}
+
+message RemoveFieldDefinitionRequest {
+  string itemDefinitionId = 1;
+  string fieldName = 2;
+}
+
+message GetItemDefinitionRequest {
+  string itemDefinitionId = 1;
+}
+message ItemDefinition{
+  string id = 1;
+  string name = 2;
+  repeated FieldDefinition fieldDefinitions = 3;
+}
+
+message FieldDefinition {
+  string fieldName = 1;
+  FieldValueType valueType = 2;
+}
+
+enum FieldValueType {
+  Boolean = 0;
+  Integer = 1;
+  Double = 2;
+  Decimal = 3;
+  DateTime = 4;
+  TimeSpan = 5;
+  String = 6;
+  Reference = 7;
+}

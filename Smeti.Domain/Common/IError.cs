@@ -2,7 +2,7 @@
 
 namespace Smeti.Domain.Common;
 
-public interface IDomainEvent : INotification
+public interface IError : INotification
 {
     DateTimeOffset Timestamp { get; }
 }

@@ -7,6 +7,7 @@ public enum FieldValueType
     Double,
     Decimal,
     DateTime,
-    TimeStamp,
+    TimeSpan,
+    String,
     Reference
 }

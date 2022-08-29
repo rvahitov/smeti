@@ -71,7 +71,7 @@ public sealed class ItemDefinitionActor : ReceivePersistentActor
         return _state.Case switch
         {
             null => Prelude.Left<IDomainError, IItemDefinitionEvent>(ItemDefinitionError.NotExist(id)),
-            ItemDefinitionActorState { FieldDefinitions: var defs } when defs.ContainsKey(fieldName) =>
+            ItemDefinitionActorState state when state.ContainsField(fieldName) =>
                 Prelude.Left<IDomainError, IItemDefinitionEvent>(
                     ItemDefinitionError.AlreadyHasFieldDefinition(id, fieldName)
                 ),
@@ -85,7 +85,7 @@ public sealed class ItemDefinitionActor : ReceivePersistentActor
         return _state.Case switch
         {
             null => Prelude.Left<IDomainError, IItemDefinitionEvent>(ItemDefinitionError.NotExist(id)),
-            ItemDefinitionActorState { FieldDefinitions: var defs } when defs.ContainsKey(fieldName) == false =>
+            ItemDefinitionActorState state when state.ContainsField(fieldName) == false =>
                 Prelude.Left<IDomainError, IItemDefinitionEvent>(ItemDefinitionError.DoesNotHaveFieldDefinition(
                     id, fieldName
                 )),

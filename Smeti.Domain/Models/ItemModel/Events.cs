@@ -4,7 +4,7 @@ using Smeti.Domain.Models.ItemDefinitionModel;
 
 namespace Smeti.Domain.Models.ItemModel;
 
-public interface IItemEvent : IDomainEvent
+public interface IItemEvent : IError
 {
     ItemId ItemId { get; }
 }

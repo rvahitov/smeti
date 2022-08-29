@@ -6,6 +6,7 @@ namespace Smeti.Domain.Models.ItemModel;
 
 public interface IItemCommand : IDomainCommand<Item>
 {
+    ItemId ItemId { get; }
 }
 
 public sealed record CreateItemCommand(ItemId ItemId, ItemDefinitionId ItemDefinitionId, Lst<IField> Fields)

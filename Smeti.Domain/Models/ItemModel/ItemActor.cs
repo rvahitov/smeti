@@ -199,7 +199,7 @@ public sealed class ItemActor : ReceivePersistentActor
                             Prelude.Right<(FieldName, InvalidFieldReason), IField>(field),
                         FieldValueType.DateTime when field is IField<DateTimeOffset> =>
                             Prelude.Right<(FieldName, InvalidFieldReason), IField>(field),
-                        FieldValueType.TimeStamp when field is IField<TimeSpan> =>
+                        FieldValueType.TimeSpan when field is IField<TimeSpan> =>
                             Prelude.Right<(FieldName, InvalidFieldReason), IField>(field),
                         FieldValueType.Reference when field is IField<ItemId> =>
                             Prelude.Right<(FieldName, InvalidFieldReason), IField>(field),
